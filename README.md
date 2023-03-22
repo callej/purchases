@@ -33,3 +33,11 @@ The database ended up having 4 tables. Here is the model:
    - purchases_id (Foreign Key, referencing Purchases.id)
    - item_id (Foreign Key, referencing Items.id)
    - quantity
+   
+
+<br/><br/>
+   
+   <img width="831" alt="image" src="https://user-images.githubusercontent.com/1498298/227059513-ed406ef7-af94-460a-806f-946b6b496a97.png">
+
+
+<br/><br/>
