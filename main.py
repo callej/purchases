@@ -254,7 +254,15 @@ class App:
         self.report_text = tk.Text(self.report_tab, wrap=tk.WORD, state="disabled", width=80, height=20)
         self.report_text.grid(column=0, row=0, padx=5, pady=5)
 
-        ttk.Button(self.report_tab, text="Generate Report", command=self.generate_report).grid(column=0, row=1, padx=5, pady=5)
+        ttk.Button(self.report_tab, text="Generate Purchase Report", command=self.generate_report).grid(column=0, row=1, padx=5, pady=5)
+        ttk.Button(self.report_tab, text="Generate People Report", command=self.generate_people_report).grid(column=0,
+                                                                                                             row=2,
+                                                                                                             padx=5,
+                                                                                                             pady=5)
+        ttk.Button(self.report_tab, text="Generate Items Report", command=self.generate_items_report).grid(column=0,
+                                                                                                           row=3,
+                                                                                                           padx=5,
+                                                                                                           pady=5)
 
     def generate_report(self):
         conn = sqlite3.connect("database.db")
@@ -279,6 +287,44 @@ class App:
             total_cost += cost
 
         report += f"\nTotal Cost: ${total_cost:.2f}"
+
+        conn.close()
+
+        self.report_text.configure(state="normal")
+        self.report_text.delete(1.0, tk.END)
+        self.report_text.insert(tk.END, report)
+        self.report_text.configure(state="disabled")
+
+    def generate_people_report(self):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM people")
+        people = cursor.fetchall()
+
+        report = "People:\n\n"
+
+        for person in people:
+            report += f"ID: {person[0]}, Name: {person[1]}, Email: {person[2]}, Phone: {person[3]}\n"
+
+        conn.close()
+
+        self.report_text.configure(state="normal")
+        self.report_text.delete(1.0, tk.END)
+        self.report_text.insert(tk.END, report)
+        self.report_text.configure(state="disabled")
+
+    def generate_items_report(self):
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM items")
+        items = cursor.fetchall()
+
+        report = "Items:\n\n"
+
+        for item in items:
+            report += f"ID: {item[0]}, Name: {item[1]}, Price: ${item[2]:.2f}\n"
 
         conn.close()
 
