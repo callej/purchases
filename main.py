@@ -1,5 +1,6 @@
 import sqlite3
 import tkinter as tk
+from datetime import datetime
 from tkinter import ttk, messagebox
 
 
@@ -23,6 +24,8 @@ class App:
         self.notebook.add(self.items_tab, text="Items")
         self.notebook.add(self.purchases_tab, text="Purchases")
         self.notebook.add(self.report_tab, text="Report")
+
+        self.purchase_items_list = []
 
         self.create_people_tab()
         self.create_items_tab()
@@ -54,6 +57,7 @@ class App:
         CREATE TABLE IF NOT EXISTS purchases (
             id INTEGER PRIMARY KEY,
             person_id INTEGER NOT NULL,
+            timestamp TEXT NOT NULL,
             FOREIGN KEY (person_id) REFERENCES people (id)
         )
         """)
@@ -171,7 +175,10 @@ class App:
         self.quantity_entry.grid(column=1, row=2, padx=5, pady=5)
 
         # Add button
-        ttk.Button(self.purchases_tab, text="Add Purchase", command=self.add_purchase).grid(column=1, row=3, padx=5, pady=5)
+        ttk.Button(self.purchases_tab, text="Add Item", command=self.add_purchase_item).grid(column=2, row=2, padx=5,
+                                                                                            pady=5)
+        ttk.Button(self.purchases_tab, text="Finalize Purchase", command=self.add_purchase).grid(column=2, row=3, padx=5,
+                                                                                                pady=5)
 
     def update_people_combobox(self):
         conn = sqlite3.connect("database.db")
@@ -193,12 +200,11 @@ class App:
 
         self.item_combobox["values"] = [f"{item[0]} - {item[1]}" for item in items]
 
-    def add_purchase(self):
-        person = self.person_combobox.get()
+    def add_purchase_item(self):
         item = self.item_combobox.get()
         quantity = self.quantity_entry.get()
 
-        if not person or not item or not quantity:
+        if not item or not quantity:
             messagebox.showerror("Error", "Please fill in all fields")
             return
 
@@ -210,23 +216,38 @@ class App:
             messagebox.showerror("Error", "Invalid quantity")
             return
 
-        person_id = int(person.split(" ")[0])
         item_id = int(item.split(" ")[0])
+        self.purchase_items_list.append((item_id, quantity))
+
+        self.item_combobox.set("")
+        self.quantity_entry.delete(0, tk.END)
+
+    def add_purchase(self):
+        person = self.person_combobox.get()
+
+        if not person or not self.purchase_items_list:
+            messagebox.showerror("Error", "Please fill in all fields")
+            return
+
+        person_id = int(person.split(" ")[0])
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
 
-        cursor.execute("INSERT INTO purchases (person_id) VALUES (?)", (person_id,))
+        cursor.execute("INSERT INTO purchases (person_id, timestamp) VALUES (?, ?)", (person_id, timestamp))
         purchase_id = cursor.lastrowid
-        cursor.execute("INSERT INTO purchase_items (purchase_id, item_id, quantity) VALUES (?, ?, ?)", (purchase_id, item_id, quantity))
+
+        for item_id, quantity in self.purchase_items_list:
+            cursor.execute("INSERT INTO purchase_items (purchase_id, item_id, quantity) VALUES (?, ?, ?)",
+                           (purchase_id, item_id, quantity))
 
         conn.commit()
         conn.close()
 
         messagebox.showinfo("Success", "Purchase added successfully")
         self.person_combobox.set("")
-        self.item_combobox.set("")
-        self.quantity_entry.delete(0, tk.END)
+        self.purchase_items_list = []
 
     # Report Tab
     def create_report_tab(self):
@@ -240,12 +261,13 @@ class App:
         cursor = conn.cursor()
 
         cursor.execute("""
-        SELECT p.id, pe.name, i.item_name, pi.quantity, i.price
+        SELECT p.id, pe.name, i.item_name, pi.quantity, i.price, p.timestamp
         FROM purchases p
         JOIN people pe ON p.person_id = pe.id
         JOIN purchase_items pi ON p.id = pi.purchase_id
         JOIN items i ON pi.item_id = i.id
         """)
+
         purchases = cursor.fetchall()
 
         report = "Purchases:\n\n"
@@ -253,7 +275,7 @@ class App:
         total_cost = 0
         for purchase in purchases:
             cost = purchase[3] * purchase[4]
-            report += f"{purchase[1]} bought {purchase[3]} x {purchase[2]} for ${cost:.2f}\n"
+            report += f"{purchase[1]} bought {purchase[3]} x {purchase[2]} for ${cost:.2f} on {purchase[5]}\n"
             total_cost += cost
 
         report += f"\nTotal Cost: ${total_cost:.2f}"
