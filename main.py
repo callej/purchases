@@ -23,7 +23,7 @@ class App:
         self.notebook.add(self.people_tab, text="People")
         self.notebook.add(self.items_tab, text="Items")
         self.notebook.add(self.purchases_tab, text="Purchases")
-        self.notebook.add(self.report_tab, text="Report")
+        self.notebook.add(self.report_tab, text="Reports")
 
         self.purchase_items_list = []
 
