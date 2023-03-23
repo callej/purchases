@@ -46,6 +46,6 @@ A concrete example of how the tables could look with data populated is the follo
 
 <br/><br/>
 
-![Purchase Database (Custom)](https://user-images.githubusercontent.com/1498298/227155306-0c5d9822-6b1a-4149-8a4e-75bd1d72ac55.png)
+![Purchase Database - v3](https://user-images.githubusercontent.com/1498298/227291684-423af29c-8269-4ce6-b368-ed5c392574f6.png)
 
 <br/><br/>
