@@ -41,3 +41,11 @@ The database ended up having 4 tables. Here is the model:
 
 
 <br/><br/>
+
+A concrete example of how the tables could look with data populated is the following picture:
+
+<br/><br/>
+
+![Purchase Database (Custom)](https://user-images.githubusercontent.com/1498298/227155306-0c5d9822-6b1a-4149-8a4e-75bd1d72ac55.png)
+
+<br/><br/>
